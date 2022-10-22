@@ -1,7 +1,9 @@
 package com.algaworks.logisticaapi.api.controller;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.validation.Valid;
 
@@ -64,17 +66,26 @@ public class OcorrenciaController {
       @PathVariable Long ocorrenciaId) {
     Entrega entrega = buscaEntregaService.buscar(entregaId);
 
-    Ocorrencia ocorrenciaBuscada = new Ocorrencia();
+    //Ocorrencia ocorrenciaBuscada = new Ocorrencia();
 
-    for (Ocorrencia ocorrencia : entrega.getOcorrencias()) {
-      if (ocorrencia.getId() == ocorrenciaId) {
-        ocorrenciaBuscada = ocorrencia;
-      } else {
-        System.out.println("Ocorrência não encontrada");
-      }
-    }
+    //for (Ocorrencia ocorrencia : entrega.getOcorrencias()) {
+      //if (ocorrencia.getId() == ocorrenciaId) {
+        //ocorrenciaBuscada = ocorrencia;
+      //} else {
+        //System.out.println("Ocorrência não encontrada");
+      //}
+    //}
+    
 
-    return ocorrenciaAssembler.toModel(ocorrenciaBuscada);
+    //Uso da stream-API
+    List<Ocorrencia> ocorrencias = entrega.getOcorrencias();
+
+    List<Ocorrencia> ocorrenciaBuscada = ocorrencias.stream()
+      .filter(item -> item.getId().equals(ocorrenciaId))
+      .collect(Collectors.toList());
+
+
+    return ocorrenciaAssembler.toModel(ocorrenciaBuscada.get(0));
   }
 
 }
