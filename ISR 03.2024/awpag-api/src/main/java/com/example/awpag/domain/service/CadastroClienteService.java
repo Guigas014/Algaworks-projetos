@@ -15,6 +15,12 @@ public class CadastroClienteService {
 
       private final ClienteRepository clienteRepository;
 
+      // Esse método é utilizado no ParcelamentoService.
+      public Cliente buscar(Long clienteId) {
+            return clienteRepository.findById(clienteId)
+                        .orElseThrow(() -> new NegocioException("Cliente não encontrado!"));
+      }
+
       @Transactional
       public Cliente salvar(Cliente cliente) {
             // O filter testa se o cliente do DB (c) não é o mesmo cliente que vem do front.

@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.awpag.domain.exception.NegocioException;
 import com.example.awpag.domain.model.Cliente;
 import com.example.awpag.domain.repository.ClienteRepository;
 import com.example.awpag.domain.service.CadastroClienteService;
@@ -120,10 +118,11 @@ public class ClienteController {
             return ResponseEntity.noContent().build();
       }
 
+      // ESSE MÉTODO SE ENCONTRA NO APIEXCEPTIONHANDLER.JAVA
       // Esse método captura os error tratados no SERVICE(NegocioException) e trata o
       // mesmo enviando apenas uma menssagem no body.
-      @ExceptionHandler(NegocioException.class)
-      public ResponseEntity<String> capturarErro(NegocioException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-      }
+      // @ExceptionHandler(NegocioException.class)
+      // public ResponseEntity<String> capturarErro(NegocioException e) {
+      // return ResponseEntity.badRequest().body(e.getMessage());
+      // }
 }
