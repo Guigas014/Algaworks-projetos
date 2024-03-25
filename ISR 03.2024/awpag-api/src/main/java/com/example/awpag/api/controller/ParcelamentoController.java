@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.awpag.api.assembler.ParcelamentoAssembler;
+import com.example.awpag.api.model.ParcelamentoInputModel;
+import com.example.awpag.api.model.ParcelamentoModel;
 import com.example.awpag.domain.model.Parcelamento;
 import com.example.awpag.domain.repository.ParcelamentoRepository;
 import com.example.awpag.domain.service.ParcelamentoService;
@@ -26,27 +29,81 @@ public class ParcelamentoController {
 
       private final ParcelamentoRepository parcelamentoRepository;
       private final ParcelamentoService parcelamentoService;
+      // private final ModelMapper modelMapper;
+      private final ParcelamentoAssembler parcelamentoAssembler;
 
+      // COM MODELMAPPER
       @GetMapping
-      public List<Parcelamento> listar() {
-            return parcelamentoRepository.findAll();
+      public List<ParcelamentoModel> listar() {
+            return parcelamentoAssembler.toCollectionModel(parcelamentoRepository.findAll());
       }
 
+      // SEM MODELMAPPER
+      // @GetMapping
+      // public List<Parcelamento> listar() {
+      // return parcelamentoRepository.findAll();
+      // }
+
+      // COM REPRESENTATION MODEL (DTO) E COM MODELMAPPER
       @GetMapping("{parcelamentoId}")
-      public ResponseEntity<Parcelamento> buscar(@PathVariable Long parcelamentoId) {
+      public ResponseEntity<ParcelamentoModel> buscar(@PathVariable Long parcelamentoId) {
             return parcelamentoRepository.findById(parcelamentoId)
-                        // E isso tudo abaixo é a mesma coisa que um IF.
-                        // .map(p -> ResponseEntity.ok(p)) essa linha faz o mesmo que a de baixo
+                        // .map(parcelamento -> modelMapper.map(parcelamento, ParcelamentoModel.class))
+                        // .map(parcelamento -> parcelamentoAssembler.toModel(parcelamento))
+                        .map(parcelamentoAssembler::toModel)
                         .map(ResponseEntity::ok)
                         .orElse(ResponseEntity.notFound().build());
 
       }
+      // // COM REPRESENTATION MODEL (DTO) E SEM MODELMAPPER
+      // @GetMapping("{parcelamentoId}")
+      // public ResponseEntity<ParcelamentoModel> buscar(@PathVariable Long
+      // parcelamentoId) {
+      // return parcelamentoRepository.findById(parcelamentoId)
+      // .map(parcelamento -> {
+      // var parcelamentoModel = new ParcelamentoModel();
+      // parcelamentoModel.setId(parcelamento.getId());
+      // parcelamentoModel.setNomeCliente(parcelamento.getCliente().getNome());
+      // parcelamentoModel.setDescricao(parcelamento.getDescricao());
+      // parcelamentoModel.setValorTotal(parcelamento.getValorTotal());
+      // parcelamentoModel.setParcelas(parcelamento.getQuantidadeParcelas());
+      // parcelamentoModel.setDataCriacao(parcelamento.getDataCriacao());
 
+      // return ResponseEntity.ok(parcelamentoModel);
+      // })
+      // .orElse(ResponseEntity.notFound().build());
+
+      // }
+
+      // COM DOMAIN MODEL
+      // @GetMapping("{parcelamentoId}")
+      // public ResponseEntity<Parcelamento> buscar(@PathVariable Long parcelamentoId)
+      // {
+      // return parcelamentoRepository.findById(parcelamentoId)
+      // // A linha abaixo é a mesma coisa que um tratamento de erro com IF.
+      // // .map(p -> ResponseEntity.ok(p)) essa linha faz o mesmo que a de baixo
+      // .map(ResponseEntity::ok)
+      // .orElse(ResponseEntity.notFound().build());
+
+      // }
+
+      // COM MODELMAPPER NA SAÍDA E NA ENTRADA
       @PostMapping
       @ResponseStatus(HttpStatus.CREATED)
-      public Parcelamento cadastrar(@Valid @RequestBody Parcelamento parcelamento) {
-            return parcelamentoService.cadastrar(parcelamento);
+      public ParcelamentoModel cadastrar(@Valid @RequestBody ParcelamentoInputModel parcelamentoInputModel) {
+            Parcelamento novoParcelamento = parcelamentoAssembler.toEntity(parcelamentoInputModel);
+            Parcelamento parcelamentoCadastrado = parcelamentoService.cadastrar(novoParcelamento);
+
+            return parcelamentoAssembler.toModel(parcelamentoCadastrado);
       }
+
+      // SEM MODELMAPPER
+      // @PostMapping
+      // @ResponseStatus(HttpStatus.CREATED)
+      // public Parcelamento cadastrar(@Valid @RequestBody Parcelamento parcelamento)
+      // {
+      // return parcelamentoService.cadastrar(parcelamento);
+      // }
 
       // ESSE MÉTODO SE ENCONTRA NO APIEXCEPTIONHANDLER.JAVA
       // Esse método captura os error tratados no SERVICE(NegocioException) e trata o
