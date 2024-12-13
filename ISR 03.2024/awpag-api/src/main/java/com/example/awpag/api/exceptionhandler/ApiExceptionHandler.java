@@ -37,8 +37,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
                   HttpHeaders headers, HttpStatusCode status, WebRequest request) {
 
             // Criamos um problemDetail para um único status (nesse caso 400) e alteramos as
-            // prorpiedades
-            // necessárias.
+            // prorpiedades necessárias.
             ProblemDetail problemDetail = ProblemDetail.forStatus(status);
             problemDetail.setTitle("Um ou mais campos estão inválidos.");
             problemDetail.setType(URI.create("https://uri/com/a/documentacao/da/api"));
