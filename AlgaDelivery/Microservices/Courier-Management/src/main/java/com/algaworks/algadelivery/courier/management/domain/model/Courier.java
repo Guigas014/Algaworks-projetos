@@ -1,0 +1,84 @@
+package com.algaworks.algadelivery.courier.management.domain.model;
+
+import java.time.OffsetDateTime;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.UUID;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+@Setter(AccessLevel.PRIVATE)
+public class Courier {
+
+      @Id
+      @EqualsAndHashCode.Include
+      private UUID id;
+
+      @Setter(AccessLevel.PUBLIC)
+      private String name;
+
+      @Setter(AccessLevel.PUBLIC)
+      private String phone;
+
+      private Integer fulfilledDeliveriesQunatity;
+
+      private Integer pendingDeliveriesQuantity;
+
+      private OffsetDateTime lastFulfilledDeliveryAt;
+
+      @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, mappedBy = "courier")
+      private List<AssignedDelivery> pendingDeliveries = new ArrayList<>();
+
+      // Método que acessa a lista de entregas pendentes
+      public List<AssignedDelivery> getPendingDeliveries() {
+            return Collections.unmodifiableList(this.pendingDeliveries);
+      }
+
+      // Método para criar um Courier
+      public static Courier brandNew(String name, String phone) {
+            Courier courier = new Courier();
+
+            courier.setId(UUID.randomUUID());
+            courier.setName(name);
+            courier.setPhone(phone);
+            courier.setFulfilledDeliveriesQunatity(0);
+            courier.setPendingDeliveriesQuantity(0);
+
+            return courier;
+      }
+
+      // Método que inseri uma entrega pendente na lista de entregas pendentes
+      public void assign(UUID deliveryId) {
+
+            this.pendingDeliveries.add(AssignedDelivery.pending(deliveryId, this));
+
+            this.pendingDeliveriesQuantity++;
+      }
+
+      // Método que deleta uma entrega pendente na lista de entregas pendentes
+      public void fulfill(UUID deliveryId) {
+            AssignedDelivery delivery = this.pendingDeliveries.stream()
+                        .filter(d -> d.getId().equals(deliveryId))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Delivery not found"));
+
+            this.pendingDeliveries.remove(delivery);
+
+            this.pendingDeliveriesQuantity--;
+            this.fulfilledDeliveriesQunatity++;
+            this.lastFulfilledDeliveryAt = OffsetDateTime.now();
+      }
+}
