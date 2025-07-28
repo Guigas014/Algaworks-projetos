@@ -1,5 +1,6 @@
 package com.algaworks.algadelivery.courier.management.domain.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +9,8 @@ import com.algaworks.algadelivery.courier.management.domain.model.Courier;
 
 public interface CourierRepository extends JpaRepository<Courier, UUID> {
 
-      // Additional query methods can be defined here if needed
+      Optional<Courier> findTop1ByOrderByLastFulfilledDeliveryAtAsc();
+
+      Optional<Courier> findByPendingDeliveries_id(UUID deliveryId);
 
 }
