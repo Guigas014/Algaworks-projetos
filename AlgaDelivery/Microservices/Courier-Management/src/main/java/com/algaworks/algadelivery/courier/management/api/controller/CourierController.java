@@ -1,6 +1,7 @@
 package com.algaworks.algadelivery.courier.management.api.controller;
 
 import java.math.BigDecimal;
+import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.data.domain.Pageable;
@@ -20,10 +21,13 @@ import com.algaworks.algadelivery.courier.management.domain.service.CourierRegis
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping("/api/v1/couriers")
 @RequiredArgsConstructor
+@Slf4j // GERA OS LOGS.
 public class CourierController {
 
       private final CourierRegistrationService courierRegistrationService;
@@ -54,9 +58,19 @@ public class CourierController {
       }
 
       // Calcula o payout do courier(entregador)
+      @SneakyThrows
       @PostMapping("/payout-calculation")
       public CourierPayoutResultModel calculate(
                   @RequestBody CourierPayoutCalculationInput input) {
+
+            // Simula uma falha na request e usa o Resilience Patter
+            log.info("Calculating");
+            if (Math.random() < 0.5) {
+                  throw new RuntimeException();
+            }
+            int millis = new Random().nextInt(400);
+            Thread.sleep(millis);
+
             BigDecimal payoutFee = courierPayoutService.calculate(input.getDistanceInKm());
 
             return new CourierPayoutResultModel(payoutFee);

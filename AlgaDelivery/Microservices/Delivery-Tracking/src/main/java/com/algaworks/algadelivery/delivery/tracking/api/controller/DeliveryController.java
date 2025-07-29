@@ -1,5 +1,6 @@
 package com.algaworks.algadelivery.delivery.tracking.api.controller;
 
+import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import com.algaworks.algadelivery.delivery.tracking.domain.service.DeliveryPrepa
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 
 @RestController
 @RequestMapping("/api/v1/deliveries")
@@ -46,8 +48,17 @@ public class DeliveryController {
             return deliveryPreparationService.edit(input, deliveryId);
       }
 
+      @SneakyThrows
       @GetMapping
       public PagedModel<Delivery> findAll(@PageableDefault Pageable pageable) {
+
+            // Provoca uma falha na request
+            if (Math.random() < 0.7) {
+                  throw new RuntimeException();
+            }
+            int millis = new Random().nextInt(400);
+            Thread.sleep(millis);
+
             return new PagedModel<>(deliveryRepository.findAll(pageable));
       }
 
